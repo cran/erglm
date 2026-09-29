@@ -71,9 +71,9 @@ test_that("erglm_predict works with default data", {
   prd <- erglm_predict(mod)
   pr_resp <- predict(mod, type = "response", se.fit = TRUE)
   pr_link <- predict(mod, type = "link", se.fit = TRUE)
-  expect_equal(prd$fit_resp, pr_resp$fit)
-  expect_equal(prd$fit_link, pr_link$fit)
-  expect_equal(prd$se_link, pr_link$se.fit)
+  expect_equal(prd$fit_resp, unname(pr_resp$fit))
+  expect_equal(prd$fit_link, unname(pr_link$fit))
+  expect_equal(prd$se_link, unname(pr_link$se.fit))
 })
 
 test_that("erglm_predict works with modified data", {
@@ -83,9 +83,9 @@ test_that("erglm_predict works with modified data", {
   prd <- erglm_predict(mod, newdata = dat_1)
   pr_resp <- predict(mod, newdata = dat_1, type = "response", se.fit = TRUE)
   pr_link <- predict(mod, newdata = dat_1, type = "link", se.fit = TRUE)
-  expect_equal(prd$fit_resp, pr_resp$fit)
-  expect_equal(prd$fit_link, pr_link$fit)
-  expect_equal(prd$se_link, pr_link$se.fit)
+  expect_equal(prd$fit_resp, unname(pr_resp$fit))
+  expect_equal(prd$fit_link, unname(pr_link$fit))
+  expect_equal(prd$se_link, unname(pr_link$se.fit))
 })
 
 test_that("erglm_predict can adjust confidence level", {
@@ -132,12 +132,12 @@ test_that("erglm_predict is family-generic", {
   mod_pois <- erglm_model(ae_count ~ aucss + sex, erglm_data, family = poisson())
   prd <- erglm_predict(mod_pois)
   pr_resp <- predict(mod_pois, type = "response", se.fit = TRUE)
-  expect_equal(prd$fit_resp, pr_resp$fit)
+  expect_equal(prd$fit_resp, unname(pr_resp$fit))
 
   mod_gauss <- erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())
   prd_gauss <- erglm_predict(mod_gauss)
   pr_resp_gauss <- predict(mod_gauss, type = "response", se.fit = TRUE)
-  expect_equal(prd_gauss$fit_resp, pr_resp_gauss$fit)
+  expect_equal(prd_gauss$fit_resp, unname(pr_resp_gauss$fit))
 })
 
 test_that("erglm_fun is family-generic", {

@@ -4,7 +4,7 @@
 # erglm has no hard dependency on erplots (a modelling package shouldn't need
 # to pull in ggplot2/patchwork). But if erplots *is* installed and loaded,
 # erglm's model objects should work seamlessly with erplots' model-agnostic
-# plotting API (`er_plot_show_model()`, `er_vpc_plot()`, etc.), which relies
+# plotting API (`er_plot_add_model()`, `er_vpc_add_simulated()`, etc.), which relies
 # on the `er_predict()`/`er_simulate()`/`er_summary()` generics defined in
 # erplots (see `erplots::er_model_interface`).
 #
@@ -36,14 +36,15 @@ er_summary.erglm_model <- function(model, conf_level = 0.95, ...) {
   estimate <- unname(coefs[, 1])
   std_error <- unname(coefs[, 2])
 
-  coefficients <- tibble::tibble(
+  coefficients <- data.frame(
+    check.names = FALSE,
     term = rownames(coefs),
     estimate = estimate,
     std_error = std_error,
     statistic = unname(coefs[, 3]),
     p_value = unname(coefs[, p_col]),
     conf_low = estimate - z_scale * std_error,
-    conf_high = estimate + z_scale * std_error,
+    conf_high = estimate + z_scale * std_error
   )
 
   # r_squared is only meaningful for the classic OLS case (gaussian family,
@@ -56,7 +57,8 @@ er_summary.erglm_model <- function(model, conf_level = 0.95, ...) {
     NA_real_
   }
 
-  glance <- tibble::tibble(
+  glance <- data.frame(
+    check.names = FALSE,
     n = stats::nobs(model),
     df_residual = model$df.residual,
     logLik = as.numeric(stats::logLik(model)),
@@ -64,7 +66,7 @@ er_summary.erglm_model <- function(model, conf_level = 0.95, ...) {
     bic = stats::BIC(model),
     deviance = model$deviance,
     r_squared = r_squared,
-    converged = model$converged,
+    converged = model$converged
   )
 
   list(

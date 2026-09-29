@@ -18,7 +18,7 @@ erglm_remove_term(mod, term, quiet = FALSE)
 
 \item{quiet}{If \code{TRUE}, suppress the warning issued when the term
 can't be added/removed (because it's already in the model / isn't in
-the model, respectively)}
+the model, respectively). Defaults to \code{FALSE}.}
 }
 \value{
 An erglm model object. If the term can't be added/removed
@@ -32,7 +32,7 @@ returning a new fitted model object.
 These functions are not typically called directly; they
 underpin \code{\link[=erglm_scm_forward]{erglm_scm_forward()}} and \code{\link[=erglm_scm_backward]{erglm_scm_backward()}}. Named and
 shaped to match the companion \code{emaxnls} package's
-\code{emax_add_term()}/\code{emax_remove_term()}, which serve the same purpose
+\code{\link[emaxnls:emax_add_term]{emaxnls::emax_add_term()}}/\code{\link[emaxnls:emax_remove_term]{emaxnls::emax_remove_term()}}, which serve the same purpose
 for \code{emaxnls}/\code{emaxlogistic} models -- with one structural
 difference: \code{emaxnls}'s terms are two-sided formulas naming a
 structural parameter (e.g. \code{E0 ~ AGE}), since covariates there attach

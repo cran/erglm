@@ -10,7 +10,7 @@
 \item{object}{An erglm model, as returned by \code{\link[=erglm_model]{erglm_model()}}}
 
 \item{nsim}{Number of replicates. Must be a single positive whole
-number.}
+number. Defaults to \code{1}.}
 
 \item{seed}{Used to set the RNG seed. If \code{NULL}, a random seed is
 chosen and reported.}
@@ -18,7 +18,7 @@ chosen and reported.}
 \item{...}{Ignored}
 }
 \value{
-A tibble with one row per observation per simulated
+A data frame with one row per observation per simulated
 replicate, containing:
 \itemize{
 \item \code{dat_id}, \code{sim_id}: identifiers for the original observation and
@@ -57,13 +57,15 @@ dispersion parameter used for that noise is a single point estimate
 informative error.
 
 For a VPC-style plot comparing observed and simulated response rates,
-see the companion \code{erplots} package's \code{er_vpc_plot()}, which can build
-its simulated replicates directly from a fitted model (\verb{model =}
+see the companion \code{erplots} package's \code{er_vpc()} mini-grammar --
+specifically \code{\link[erplots:er_vpc_add_simulated]{erplots::er_vpc_add_simulated()}}, which can build its
+simulated replicates directly from a fitted model (its \verb{model =}
 argument) via the same \code{.erglm_draw_response()} noise mechanism this
 method uses, without needing to call \code{simulate()} yourself.
 }
 \examples{
 mod <- erglm_model(ae1 ~ aucss + sex, erglm_data, family = binomial())
-simulate(mod, nsim = 5, seed = 963)
+sim <- simulate(mod, nsim = 5, seed = 963)
+head(sim)
 
 }

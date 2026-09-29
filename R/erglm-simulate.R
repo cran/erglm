@@ -11,7 +11,7 @@
 #'
 #' @param object An erglm model, as returned by [erglm_model()]
 #' @param nsim Number of replicates. Must be a single positive whole
-#' number.
+#' number. Defaults to `1`.
 #' @param seed Used to set the RNG seed. If `NULL`, a random seed is
 #' chosen and reported.
 #' @param ... Ignored
@@ -30,12 +30,13 @@
 #' informative error.
 #'
 #' For a VPC-style plot comparing observed and simulated response rates,
-#' see the companion `erplots` package's `er_vpc_plot()`, which can build
-#' its simulated replicates directly from a fitted model (`model =`
+#' see the companion `erplots` package's `er_vpc()` mini-grammar --
+#' specifically [erplots::er_vpc_add_simulated()], which can build its
+#' simulated replicates directly from a fitted model (its `model =`
 #' argument) via the same `.erglm_draw_response()` noise mechanism this
 #' method uses, without needing to call `simulate()` yourself.
 #'
-#' @returns A tibble with one row per observation per simulated
+#' @returns A data frame with one row per observation per simulated
 #' replicate, containing:
 #' - `dat_id`, `sim_id`: identifiers for the original observation and
 #'   the simulation replicate
@@ -52,7 +53,8 @@
 #' @exportS3Method stats::simulate
 #' @examples
 #' mod <- erglm_model(ae1 ~ aucss + sex, erglm_data, family = binomial())
-#' simulate(mod, nsim = 5, seed = 963)
+#' sim <- simulate(mod, nsim = 5, seed = 963)
+#' head(sim)
 #'
 simulate.erglm_model <- function(object, nsim = 1, seed = NULL, ...) {
   .erglm_resample(object, nsim = nsim, seed = seed)
@@ -68,7 +70,7 @@ simulate.erglm_model <- function(object, nsim = 1, seed = NULL, ...) {
   .erglm_check_nsim(nsim)
   if (is.null(seed)) {
     seed <- .pick_seed()
-    rlang::inform(paste0("Using seed = ", seed, ". Pass `seed = ", seed, "` to reproduce this result."))
+    .cond_inform(paste0("Using seed = ", seed, ". Pass `seed = ", seed, "` to reproduce this result."))
   }
 
   family_name <- stats::family(mod)$family
@@ -86,7 +88,7 @@ simulate.erglm_model <- function(object, nsim = 1, seed = NULL, ...) {
 
   fn <- erglm_fun(mod)
 
-  withr::with_seed(
+  .seed_with_seed(
     seed = seed,
     code = {
       par <- mvtnorm::rmvnorm(n = nsim, mean = est, sigma = stats::vcov(mod))
@@ -95,7 +97,8 @@ simulate.erglm_model <- function(object, nsim = 1, seed = NULL, ...) {
       sim <- vector("list", nsim)
       for (ss in seq_len(nsim)) {
         mu_ss <- fn(param = par[ss, ], data = mod$data, type = "response")
-        sim[[ss]] <- tibble::tibble(
+        sim[[ss]] <- data.frame(
+          check.names = FALSE,
           dat_id = seq_len(nr),
           sim_id = ss,
           mu = mu_ss,
@@ -105,14 +108,14 @@ simulate.erglm_model <- function(object, nsim = 1, seed = NULL, ...) {
     }
   )
 
-  sim <- dplyr::bind_rows(sim)
-  par <- tibble::as_tibble(par)
+  sim <- do.call(rbind, sim)
+  par <- .table_as_tibble(par)
   # prefix coefficient columns so they can't collide with predictor
   # columns of the same name once joined onto `dat` below
   names(par) <- paste0("coef_", names(par))
   par$sim_id <- seq_len(nsim)
 
-  out <- dplyr::left_join(sim, par, by = "sim_id")
-  out <- dplyr::left_join(out, dat, by = "dat_id")
-  tibble::as_tibble(out)
+  out <- .join_left_join(sim, par, by = "sim_id")
+  out <- .join_left_join(out, dat, by = "dat_id")
+  .table_as_tibble(out)
 }

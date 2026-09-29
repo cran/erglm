@@ -9,7 +9,7 @@ test_that("erglm_model methods for erplots' generics are registered when erplots
   sim <- erplots::er_simulate(mod, erglm_data[1:5, ], nsim = 2, seed = 1)
   expect_s3_class(sim, "data.frame")
   expect_equal(nrow(sim), 10L)
-  # sim_resp is the erplots er_vpc_plot(model = ...) contract addition:
+  # sim_resp is the erplots er_vpc_add_simulated(model = ...) contract addition:
   # a full response-scale draw (0/1 for a binomial model), not just the
   # expected-response fit_resp
   expect_true(all(c("fit_resp", "sim_resp") %in% names(sim)))

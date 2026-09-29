@@ -25,7 +25,7 @@
 .erglm_check_conf_level <- function(conf_level) {
   if (!is.numeric(conf_level) || length(conf_level) != 1L || is.na(conf_level) ||
       conf_level < 0 || conf_level > 1) {
-    rlang::abort(paste0(
+    .cond_abort(paste0(
       "`conf_level` must be a single number between 0 and 1 (inclusive), not ",
       .fmt_bad_value(conf_level), "."
     ))
@@ -49,13 +49,13 @@
 # term in `term` got added at once with no warning.
 .erglm_check_term <- function(term) {
   if (is.null(term) || !inherits(term, "formula")) {
-    rlang::abort(paste0(
+    .cond_abort(paste0(
       "`term` must be a one-sided formula naming a single covariate ",
       "(e.g. `~ sex`), not ", .fmt_bad_value(term), "."
     ))
   }
   if (length(term) != 2L) {
-    rlang::abort(paste0(
+    .cond_abort(paste0(
       "`term` must be a one-sided formula (e.g. `~ sex`), not the ",
       "two-sided formula `", deparse(term), "`. erglm_add_term()/",
       "erglm_remove_term() work on plain covariate terms and don't use ",
@@ -64,7 +64,7 @@
   }
   trm_lab <- attr(stats::terms(term), "term.labels")
   if (length(trm_lab) != 1L) {
-    rlang::abort(paste0(
+    .cond_abort(paste0(
       "`term` must name exactly one covariate (e.g. `~ sex`), not ",
       length(trm_lab), ": `", deparse(term), "`."
     ))
@@ -84,7 +84,7 @@
 # fitting happens.
 .erglm_check_candidates <- function(candidates) {
   if (!is.character(candidates) || length(candidates) == 0L || anyNA(candidates)) {
-    rlang::abort(paste0(
+    .cond_abort(paste0(
       "`candidates` must be a non-empty character vector with no missing ",
       "values, not ", .fmt_bad_value(candidates), "."
     ))
@@ -92,20 +92,37 @@
   for (cc in candidates) {
     add <- tryCatch(stats::as.formula(paste("~", cc)), error = function(e) NULL)
     if (is.null(add)) {
-      rlang::abort(paste0(
+      .cond_abort(paste0(
         "`candidates` contains an invalid entry: \"", cc, "\" could not ",
         "be parsed as a formula term."
       ))
     }
     trm_lab <- attr(stats::terms(add), "term.labels")
     if (length(trm_lab) != 1L) {
-      rlang::abort(paste0(
+      .cond_abort(paste0(
         "`candidates` contains an invalid entry: \"", cc, "\" names ",
         length(trm_lab), " terms, not exactly one. Each element of ",
         "`candidates` must name a single covariate term (e.g. \"sex\", ",
         "not \"sex + dose\")."
       ))
     }
+  }
+}
+
+# `criterion` (as passed to `erglm_scm_forward()`/`erglm_scm_backward()`)
+# selects how a candidate term is judged: `"p-value"` (the historical
+# default -- a likelihood-ratio test compared against `threshold`) or
+# `"aic"`/`"bic"` (add/remove a term if doing so strictly improves the
+# chosen information criterion; `threshold` is then ignored). Mirrors the
+# equivalent check in the companion `emaxnls`/`ertte` packages.
+.erglm_check_criterion <- function(criterion) {
+  supported <- c("p-value", "aic", "bic")
+  if (!is.character(criterion) || length(criterion) != 1L || is.na(criterion) ||
+      !criterion %in% supported) {
+    .cond_abort(paste0(
+      "`criterion` must be one of \"", paste(supported, collapse = "\", \""),
+      "\", not ", .fmt_bad_value(criterion), "."
+    ))
   }
 }
 
@@ -117,7 +134,7 @@
 .erglm_check_nsim <- function(nsim) {
   if (!is.numeric(nsim) || length(nsim) != 1L || is.na(nsim) ||
       nsim < 1 || abs(nsim - round(nsim)) > .Machine$double.eps^0.5) {
-    rlang::abort(paste0(
+    .cond_abort(paste0(
       "`nsim` must be a single positive whole number, not ",
       .fmt_bad_value(nsim), "."
     ))

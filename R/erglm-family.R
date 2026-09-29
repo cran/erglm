@@ -39,7 +39,7 @@
     poisson = stats::rpois(n, lambda = fit),
     gaussian = stats::rnorm(n, mean = fit, sd = sqrt(dispersion)),
     Gamma = stats::rgamma(n, shape = 1 / dispersion, rate = 1 / (dispersion * fit)),
-    rlang::abort(
+    .cond_abort(
       paste0(
         "erglm does not support simulating responses for family \"",
         family_name, "\" (via simulate() or er_simulate()). ",

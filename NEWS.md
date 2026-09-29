@@ -1,3 +1,28 @@
+# erglm 0.2.0
+
+* `erglm_scm_forward()`/`erglm_scm_backward()` gain a `criterion`
+  argument, supporting `"aic"`/`"bic"`-based term selection in addition
+  to the existing `"p-value"` default. The SCM history (`erglm_scm_history()`)
+  gains a `criterion` column recording which selection rule was applied
+  in each forward/backward step (#7).
+* The bundled `erglm_data` dataset's continuous columns (`aucss`, `cmaxss`,
+  `biomarker_change`, `ae_duration`) are now rounded to two decimal places,
+  a more realistic degree of precision; underlying values are otherwise
+  unchanged.
+* erglm no longer depends on rlang, withr, tibble, or dplyr (`mvtnorm`
+  remains its only runtime dependency besides base `stats`). As a result,
+  `erglm_predict()`, `simulate.erglm_model()`, and the bundled `erglm_data`
+  dataset now return/are plain data frames rather than tibbles, and
+  `erglm_predict()`'s `fit_link`/`se_link`/`fit_resp` columns lose the
+  observation-index names they used to carry as a `predict.glm()`
+  artifact; underlying values are otherwise unchanged. `tibble` has also
+  been dropped from `Suggests` entirely, since the vignettes now build
+  their example data with plain `data.frame()` calls too.
+* Fixed several documentation gaps across help pages, vignettes, and the
+  README: missing descriptions, undocumented argument defaults, and
+  broken cross-references, including several references to erplots'
+  `er_vpc_plot()`, which has been replaced by `er_vpc_add_simulated()`.
+
 # erglm 0.1.1
 
 CRAN resubmission, addressing reviewer feedback on the 0.1.0 submission:

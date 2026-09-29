@@ -19,23 +19,22 @@ to \code{coef(object)} (the fitted coefficients) if not supplied.
 \item The \code{type} argument should be a string indicating the type
 of prediction to generate (defaults to \code{"response"})
 }
-
-Takes a fitted glm object as input and returns a function
-that will evaluate the underlying structural model with
-user-specified parameters or data (e.g., for VPCs or
-other counterfactual simulation scenarios). Uses
-\code{stats::family(object)$linkinv}, so this works for any \code{glm()}
-family, not just binomial/logistic models; tested for
-binomial, poisson, gaussian, and gamma families. Named \code{erglm_fun()}
-for consistency with the companion \code{emaxnls} package's \code{emax_fun()},
-which serves the same purpose for \code{emaxnls}/\code{emaxlogistic} models.
-The returned function checks that \code{param} is numeric and has one
-entry per column of the model matrix implied by \code{data}, erroring
-informatively rather than failing with a cryptic "non-conformable
-arguments" error from matrix multiplication.
 }
 \description{
-Prediction function for an exposure-response model
+Takes a fitted glm object as input and returns a function that
+evaluates the underlying structural model at user-specified parameters
+or data (e.g., for VPCs or other counterfactual simulation scenarios).
+}
+\details{
+Uses \code{stats::family(object)$linkinv}, so this works for any
+\code{glm()} family, not just binomial/logistic models; tested for
+binomial, poisson, gaussian, and gamma families. Named \code{erglm_fun()}
+for consistency with the companion \code{emaxnls} package's
+\code{\link[emaxnls:emax_fun]{emaxnls::emax_fun()}}, which serves the same purpose for
+\code{emaxnls}/\code{emaxlogistic} models. The returned function checks that
+\code{param} is numeric and has one entry per column of the model matrix
+implied by \code{data}, erroring informatively rather than failing with a
+cryptic "non-conformable arguments" error from matrix multiplication.
 }
 \examples{
 mod1 <- erglm_model(ae2 ~ aucss + sex, erglm_data, family = binomial())

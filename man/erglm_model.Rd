@@ -24,7 +24,9 @@ work through the same generic mechanisms but are untested.}
 A glm object
 }
 \description{
-Fit an exposure-response model based on \code{glm()}
+A thin wrapper around \code{stats::glm()} that fits the model and tags the
+result with an extra \code{erglm_model} class, so downstream erglm functions
+(and the optional erplots interoperability layer) can recognise it.
 }
 \details{
 The returned object has class \code{c("erglm_model", "glm", "lm")}:
@@ -32,7 +34,7 @@ it \emph{is} a \code{glm} object, with a little extra metadata attached. This
 means all of the usual \code{glm}/\code{lm} methods work unchanged, without
 needing an erglm-specific equivalent -- e.g. \code{summary()}, \code{coef()},
 \code{vcov()}, \code{confint()}, \code{predict()}, \code{AIC()}, \code{BIC()}, \code{logLik()}, and
-\code{anova()} for comparing nested models. See \code{vignette("methods", package = "erglm")} for worked examples of these. \code{erglm_predict()}
+\code{anova()} for comparing nested models. See \code{vignette("methods", package = "erglm")} for worked examples of these. \code{\link[=erglm_predict]{erglm_predict()}}
 is a separate, erglm-specific alternative to \code{predict()} that
 returns confidence intervals on the response scale in a tidy data
 frame; the two are complementary, not competing.

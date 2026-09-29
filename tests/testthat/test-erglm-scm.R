@@ -53,7 +53,7 @@ test_that("erglm_scm_history works when no scm called", {
   expect_s3_class(hh, "data.frame")
   expect_equal(nrow(hh), 1L)
   expect_named(hh, c(
-    "iteration", "attempt", "step", "action", "term_tested", "model_tested",
+    "iteration", "attempt", "step", "criterion", "action", "term_tested", "model_tested",
     "model_converged", "term_p_value", "model_aic", "model_bic", "model_updated"
   ))
   expect_equal(hh$iteration, 0L)
@@ -75,6 +75,47 @@ test_that(".erglm_once_backward works", {
   hh1 <- erglm_scm_history(mod1)
   hh2 <- erglm_scm_history(mod2)
   expect_equal(nrow(hh1) + 2L, nrow(hh2))
+})
+
+test_that(".erglm_check_criterion rejects unsupported values", {
+  expect_error(.erglm_check_criterion("bogus"), "criterion")
+  expect_error(.erglm_check_criterion(NA_character_), "criterion")
+  expect_error(.erglm_check_criterion(c("aic", "bic")), "criterion")
+  expect_no_error(.erglm_check_criterion("p-value"))
+  expect_no_error(.erglm_check_criterion("aic"))
+  expect_no_error(.erglm_check_criterion("bic"))
+})
+
+test_that("erglm_scm_forward/backward validate criterion", {
+  mod1 <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
+  expect_error(erglm_scm_forward(mod1, candidates = "sex", criterion = "bogus"), "criterion")
+  expect_error(erglm_scm_backward(mod1, candidates = "sex", criterion = "bogus"), "criterion")
+})
+
+test_that("erglm_scm_forward supports AIC-based selection", {
+  mod1 <- erglm_model(ae1 ~ aucss, erglm_data, family = binomial())
+  mod2 <- erglm_scm_forward(mod1, candidates = c("sex", "dose"), criterion = "aic", seed = 909)
+  hh2 <- erglm_scm_history(mod2)
+  step_rows <- hh2[hh2$iteration > 0, ]
+  expect_true(all(step_rows$criterion == "aic"))
+  expect_true(all(is.na(step_rows$term_p_value)))
+  expect_true(stats::AIC(mod2) <= stats::AIC(mod1))
+})
+
+test_that("erglm_scm_backward supports BIC-based selection", {
+  mod1 <- erglm_model(ae1 ~ aucss + sex + dose, erglm_data, family = binomial())
+  mod2 <- erglm_scm_backward(mod1, candidates = c("sex", "dose"), criterion = "bic", seed = 909)
+  hh2 <- erglm_scm_history(mod2)
+  step_rows <- hh2[hh2$iteration > 0, ]
+  expect_true(all(step_rows$criterion == "bic"))
+  expect_true(all(is.na(step_rows$term_p_value)))
+  expect_true(stats::BIC(mod2) <= stats::BIC(mod1))
+})
+
+test_that("erglm_scm_forward with criterion = \"aic\" never selects a term that increases AIC", {
+  mod1 <- erglm_model(biomarker_change ~ aucss, erglm_data, family = gaussian())
+  mod2 <- erglm_scm_forward(mod1, candidates = c("sex", "dose", "weight"), criterion = "aic", seed = 5544)
+  expect_true(stats::AIC(mod2) <= stats::AIC(mod1))
 })
 
 test_that("erglm_scm_forward works", {
